@@ -1,6 +1,6 @@
 module FuelSDK
   class FuelError < StandardError
-    attr_accessor :response, :request_options
+    attr_accessor :response, :request_options, :uri
 
     def initialize(message, opts={})
       super(message)

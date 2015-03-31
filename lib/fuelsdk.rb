@@ -7,8 +7,8 @@ require 'active_support/inflector'
 require "active_support/core_ext/array/wrap"
 
 module FuelSDK
-  require 'fuelsdk/utils'
   require 'fuelsdk/exceptions'
+  require 'fuelsdk/utils'
   autoload :HTTPRequest, 'fuelsdk/http_request'
   autoload :Targeting, 'fuelsdk/targeting'
   autoload :Soap, 'fuelsdk/soap'

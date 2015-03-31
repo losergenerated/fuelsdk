@@ -17,7 +17,7 @@ module FuelSDK::Targeting
     options = {'params' => {'access_token' => self.auth_token}}
     stack_uri = "https://www.exacttargetapis.com/platform/v1/endpoints/soap"
     response = get(stack_uri, options)
-    raise StackRecognitionError.new('Unable to determine stack', :response => response, :request_options => options, :uri => stack_uri) unless response.success?
+    raise FuelSDK::StackRecognitionError.new('Unable to determine stack', :response => response, :request_options => options, :uri => stack_uri) unless response.success?
     response['url']
   end
 end
