@@ -32,7 +32,7 @@ module FuelSDK
       url = url % url_properties if url_properties
       url.end_with?('/') ? url.chop : url
     rescue KeyError => ex
-      raise "#{ex.message} to complete #{url}"
+      raise FuelSDK::UrlCompletionError.new("#{ex.message} to complete #{url}", :uri => url)
     end
 
     def parse_properties url, properties
@@ -69,7 +69,7 @@ module FuelSDK
         begin
           (options['params'] ||= {}).merge! 'access_token' => auth_token
           rsp = rest_client.send(action, url, options)
-          raise 'Unauthorized' if rsp.message == 'Unauthorized'
+          raise FuelSDK::UnauthorizedAccessError.new('Unauthorized request', :response => rsp) if rsp.message == 'Unauthorized'
         rescue
           raise if retried
           self.refresh! # ask for forgiveness not, permission

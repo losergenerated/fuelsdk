@@ -224,7 +224,7 @@ module FuelSDK
         def retrieve_required
           # have to use instance variables so we don't recursivelly retrieve_required
           if !@name && !@customer_key
-            raise 'Unable to process DataExtension::Row ' \
+            raise FuelSDK::MissingParameterError.new 'Unable to process DataExtension::Row ' \
               'request due to missing CustomerKey and Name'
           end
           if !@name || !@customer_key
@@ -238,7 +238,7 @@ module FuelSDK
               self.name = rsp.results.first[:name]
               self.customer_key = rsp.results.first[:customer_key]
             else
-              raise 'Unable to process DataExtension::Row'
+              raise FuelSDK::UnableToProcessError.new 'Unable to process DataExtension::Row', :request_options => filter, :response => resp
             end
           end
         end
@@ -252,7 +252,7 @@ module FuelSDK
           # we could map the field to all DataExtensions, but lets make user be explicit.
           # if they are going to use fields attribute properties should
           # be a single DataExtension Defined in a Hash
-          raise 'Unable to handle muliple DataExtension definitions and a field definition'
+          raise ArgumentError.new 'Unable to handle muliple DataExtension definitions and a field definition'
         end
 
         Array.wrap(d).each do |de|
@@ -260,7 +260,7 @@ module FuelSDK
           if (explicit_fields(de) and (de['columns'] || de['fields'] || has_fields)) or
             (de['columns'] and (de['fields'] || has_fields)) or
             (de['fields'] and has_fields)
-            raise 'Fields are defined in too many ways. Please only define once.' # ahhh what, to do...
+            raise FuelSDK::InvalidParameterError.new 'Fields are defined in too many ways. Please only define once.' # ahhh what, to do...
           end
 
           # let users who chose, to define fields explicitly within the hash definition
@@ -270,7 +270,7 @@ module FuelSDK
           # sanitize
           de.delete 'columns'
           de.delete 'fields'
-          raise 'DataExtension needs atleast one field.' unless de['Fields']['Field']
+          raise FuelSDK::MissingParameterError.new 'DataExtension needs atleast one field.' unless de['Fields']['Field']
         end
       end
 

@@ -8,6 +8,7 @@ require "active_support/core_ext/array/wrap"
 
 module FuelSDK
   require 'fuelsdk/utils'
+  require 'fuelsdk/exceptions'
   autoload :HTTPRequest, 'fuelsdk/http_request'
   autoload :Targeting, 'fuelsdk/targeting'
   autoload :Soap, 'fuelsdk/soap'

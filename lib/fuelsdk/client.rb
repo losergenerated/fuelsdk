@@ -1,4 +1,5 @@
 module FuelSDK
+
   class Response
     # not doing accessor so user, can't update these values from response.
     # You will see in the code some of these
@@ -80,7 +81,7 @@ module FuelSDK
     end
 
     def request_token_data
-      raise 'Require Client Id and Client Secret to refresh tokens' unless (id && secret)
+      raise FuelSDK::MissingParameterError.new('Require Client Id and Client Secret to refresh tokens') unless (id && secret)
       {
         'clientId' => id,
         'clientSecret' => secret,
@@ -106,9 +107,15 @@ module FuelSDK
       if (self.auth_token.nil? || force)
         clear_client!
         options =  request_token_options(request_token_data)
-        response = post("https://auth.exacttargetapis.com/v1/requestToken", options)
-        raise "Unable to refresh token: #{response['message']}" unless response.has_key?('accessToken')
-
+        token_uri = "https://auth.exacttargetapis.com/v1/requestToken"
+        response = post(token_uri, options)
+        unless response.has_key?('accessToken')
+        	raise FuelSDK::TokenError.new("Unable to refresh token: #{response['message']}",
+        			:request_options => options,
+        			:uri => token_uri,
+        			:response => response
+        		)
+        end
         self.auth_token = response['accessToken']
         self.internal_token = response['legacyToken']
         self.refresh_token = response['refreshToken'] if response.has_key?("refreshToken")

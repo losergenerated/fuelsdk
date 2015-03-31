@@ -1,15 +1,6 @@
 require 'savon'
 module FuelSDK
 
-  class DescribeError < StandardError
-    attr_reader :response
-    def initialize response=nil, message=nil
-      response.instance_variable_set(:@message, message) # back door update
-      @response = response
-      super message
-    end
-  end
-
   class SoapResponse < FuelSDK::Response
 
     def continue
@@ -92,7 +83,7 @@ module FuelSDK
     include FuelSDK::Targeting
 
     def header
-      raise 'Require legacy token for soap header' unless internal_token
+      raise FuelSDK::TokenError.new('Require legacy token for soap header') unless internal_token
       {
         'oAuth' => {
           'oAuthToken' => internal_token,
@@ -172,7 +163,7 @@ module FuelSDK
     end
 
     def cache_properties action, object_type, properties
-      raise 'Properties should be in cache as a list' unless properties.kind_of? Array
+      raise ArgumentError.new('Properties should be in cache as a list') unless properties.kind_of? Array
       cache[action][object_type] = properties
     end
 
@@ -238,7 +229,7 @@ module FuelSDK
     end
 
     def add_complex_filter_part filter
-      raise 'Missing SimpleFilterParts' if !filter['LeftOperand'] || !filter['RightOperand']
+      raise FuelSDK::MissingParameterError.new('Missing SimpleFilterParts') if !filter['LeftOperand'] || !filter['RightOperand']
       filter['LeftOperand']['@xsi:type']  = 'tns:SimpleFilterPart'
       filter['RightOperand']['@xsi:type'] = 'tns:SimpleFilterPart'
       filter['@xsi:type'] = 'tns:ComplexFilterPart'
@@ -325,8 +316,8 @@ module FuelSDK
     end
 
     def create_objects_message object_type, object_properties
-      raise 'Object properties must be a List' unless object_properties.kind_of? Array
-      raise 'Object properties must be a List of Hashes' unless object_properties.first.kind_of? Hash
+      raise ArgumentError.new('Object properties must be a List') unless object_properties.kind_of? Array
+      raise ArgumentError.new('Object properties must be a List of Hashes') unless object_properties.first.kind_of? Hash
       object_properties.each do |property|
         property['@xsi:type'] = "tns:#{object_type}"
       end
@@ -374,7 +365,7 @@ module FuelSDK
 
     def normalize_properties_for_cud object_type, properties
       properties = Array.wrap(properties)
-      raise 'Object properties must be a Hash' unless properties.first.kind_of? Hash
+      raise ArgumentError.new('Object properties must be a Hash') unless properties.first.kind_of? Hash
 
       if is_a_dataextension? object_type
         format_dataextension_cud_properties properties
